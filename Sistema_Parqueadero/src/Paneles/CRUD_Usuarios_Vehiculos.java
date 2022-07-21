@@ -141,6 +141,17 @@ public class CRUD_Usuarios_Vehiculos extends javax.swing.JPanel {
         jbtnBorrar.setEnabled(false);
     }
   
+    public void actualizarDatos(String cedula, String nombre, String apellido, String color) {
+        DataManager manejador = new DataManager();
+        manejador.ejecutarConsulta("UPDATE usuarios SET nombre='" + nombre + "', apellido='" + apellido + "' WHERE cedula='" + cedula + "';");
+        manejador.ejecutarConsulta("UPDATE vehiculos SET color='" + color + "' WHERE id_usuario='" + cedula + "';");
+    }
+    
+    
+    public void eliminarUsuario(String cedula){
+        DataManager manejador = new DataManager(); 
+        manejador.ejecutarConsulta("Delete from usuarios where cedula='"+cedula+"';");
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
