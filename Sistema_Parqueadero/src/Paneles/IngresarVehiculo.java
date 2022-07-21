@@ -34,7 +34,6 @@ public class IngresarVehiculo extends javax.swing.JPanel {
         jtxtPlacaIngreso = new javax.swing.JTextField();
         jbtnIngreso = new javax.swing.JButton();
         jbtnSalida = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
         jbtnPrecio = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jlblPrecio = new javax.swing.JLabel();
@@ -57,8 +56,6 @@ public class IngresarVehiculo extends javax.swing.JPanel {
             }
         });
 
-        jLabel2.setText("Plazas disponibles: ");
-
         jbtnPrecio.setText("Precio");
         jbtnPrecio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -79,12 +76,9 @@ public class IngresarVehiculo extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(167, 167, 167)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addGap(18, 18, 18)
-                                .addComponent(jlblPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jLabel4)
+                        .addGap(18, 18, 18)
+                        .addComponent(jlblPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(206, 206, 206)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -98,7 +92,7 @@ public class IngresarVehiculo extends javax.swing.JPanel {
                                 .addComponent(jLabel1)
                                 .addGap(62, 62, 62)
                                 .addComponent(jtxtPlacaIngreso, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(285, Short.MAX_VALUE))
+                .addContainerGap(323, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -112,9 +106,7 @@ public class IngresarVehiculo extends javax.swing.JPanel {
                     .addComponent(jbtnIngreso)
                     .addComponent(jbtnSalida)
                     .addComponent(jbtnPrecio))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 95, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addGap(35, 35, 35)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jlblPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -138,10 +130,9 @@ public class IngresarVehiculo extends javax.swing.JPanel {
 
     }//GEN-LAST:event_jbtnPrecioActionPerformed
 
-
+//Se cambio el codigo 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JButton jbtnIngreso;
     private javax.swing.JButton jbtnPrecio;
