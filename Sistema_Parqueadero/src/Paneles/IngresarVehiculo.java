@@ -5,6 +5,17 @@
  */
 package Paneles;
 
+import Conexion.DataBase;
+import Conexion.DataManager;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 
 /**
@@ -16,15 +27,165 @@ public class IngresarVehiculo extends javax.swing.JPanel {
     /**
      * Creates new form IngresarVehiculo
      */
-    public IngresarVehiculo() {
+    
+    Inicio home;
+    int[] numeroPlaza = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    
+    int plazasdisponibles = 10;
+    
+    public IngresarVehiculo(Inicio principal) {
         initComponents();
+        this.home = principal;
+    }
+    
+    public void buscarPlaca(String placa) {
+        DataManager manejador = new DataManager();
+        ArrayList<Object> tablavehiculos = new ArrayList<>();
+        tablavehiculos = manejador.resultado("SELECT placa FROM vehiculos WHERE placa = '" + placa + "';");
+        
+        ArrayList<Object> tablaservicioEntrada = new ArrayList<>();
+        tablaservicioEntrada = manejador.resultado("SELECT hora_entrada FROM servicio WHERE placa_vehi = '" + placa + "';");
+        if (!tablavehiculos.isEmpty() && tablaservicioEntrada.isEmpty()) {
+            this.ingresoVehiculo(placa);
+        } else if (!tablavehiculos.isEmpty() && !tablaservicioEntrada.isEmpty()) {
+            System.out.println("Ya ingresado");
+        } else if (tablavehiculos.isEmpty() && tablaservicioEntrada.isEmpty()) {
+            System.out.println("No registrado");
+        }
+        
+    }
+    
+    public void ingresoVehiculo(String placa) {
+        try {
+            String cedula = null, placa1 = null;
+            DataManager manejador = new DataManager();
+            ResultSet datos = manejador.obtenerDatos("Select id_usuario, placa from vehiculos where placa='" + placa + "';");
+            while (datos.next()) {
+                cedula = datos.getString("id_usuario");
+                placa1 = datos.getString("placa");
+            }
+            String horaEntrada = this.obtenerHora();
+            String plaza = String.valueOf(this.asignarPlaza());
+            
+            DataBase cn = new DataBase();
+            Connection cc = cn.conectar();
+            
+            String sql = "INSERT INTO servicio (plaza, id_usuario, placa_vehi, hora_entrada) VALUES (?,?,?,?);";
+            PreparedStatement psd = cc.prepareStatement(sql);
+            psd.setString(1, plaza);
+            psd.setString(2, cedula);
+            psd.setString(3, placa1);
+            psd.setString(4, horaEntrada);
+//            psd.setString(5, "null");
+//            psd.setString(6, "null");
 
+            psd.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(IngresarVehiculo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public String obtenerHora() {
+        LocalDateTime locaDate = LocalDateTime.now();
+        int hours = locaDate.getHour();
+        int minutes = locaDate.getMinute();
+        int seconds = locaDate.getSecond();
+        System.out.println("Hora actual : " + hours + ":" + minutes);
+        return String.valueOf(hours + ":" + minutes);
+        
+    }
+    
+    public int asignarPlaza() {
+        
+        int plaza = 0;
+        for (int i = 0; i <= numeroPlaza.length; i++) {
+            if (numeroPlaza[i] != 0) {
+                plaza = numeroPlaza[i];
+                numeroPlaza[i] = 0;
+                break;
+            }
+            break;
+        }
+        return plaza;
+    }
+    
+    public void devolverPlaza(int plaza) {
+        for (int i = 0; i < numeroPlaza.length; i++) {
+            if (numeroPlaza[i] == 0) {
+                numeroPlaza[i] = plaza;
+                break;
+            }
+            break;
+        }
+    }
+    
+     public void salidaVehiculo(String placa) {
+        try {
+            DataManager manejador = new DataManager();
+            String horaSalida = this.obtenerHora();
+            ArrayList<Object> plaza = new ArrayList<>();
+            plaza = manejador.resultado("SELECT plaza FROM servicio WHERE placa_vehi = '" + placa + "';");
+            int plazaDevolver = Integer.valueOf(plaza.get(0).toString());
+            this.devolverPlaza(plazaDevolver);
+            
+            DataBase cn = new DataBase();
+            Connection cc = cn.conectar();
+            
+            String sql = "Update servicio set hora_salida= '" + horaSalida + "' where placa_vehi='" + placa + "'";
+            manejador.ejecutarConsulta(sql);
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(IngresarVehiculo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+     
+      public void calcularPrecio(String placa) {
+        DataManager manejador = new DataManager();
+        ArrayList<Object> horas = new ArrayList<>();
+        horas = manejador.resultado("Select hora_entrada, hora_salida from servicio where placa_vehi='" + placa + "'");
+        
+        String[] Entrada = String.valueOf(horas.get(0)).split(":");
+        String[] Salida = String.valueOf(horas.get(1)).split(":");
+        
+        int horaEntrada = Integer.valueOf(Entrada[0]);
+        System.out.println(horaEntrada);
+        int minutoEntrada = Integer.valueOf(Entrada[1]);
+        System.out.println(minutoEntrada);
+        
+        int horaSalida = Integer.valueOf(Salida[0]);
+        int minutoSalida = Integer.valueOf(Salida[1]);
+        
+        int minutosEntrada = (horaEntrada * 60) + minutoEntrada;
+        System.out.println(minutosEntrada);
+        int minutosSalida = (horaSalida * 60) + minutoSalida;
+        System.out.println(minutosSalida);
+        int minutosTrans = minutosSalida - minutosEntrada;
+        System.out.println(minutosTrans);
+        
+        int numeroRestas = 0;
+        int residuo = 0;
+        if (minutosTrans > 60) {
+            while (minutosTrans > 60) {
+                minutosTrans = minutosTrans - 60;
+                numeroRestas++;
+            }
+        }
+        
+        int precio = numeroRestas * 1;
+        if (minutosTrans > 0) {
+            precio = precio + 1;
+        }
+        System.out.println(precio);
+        manejador.ejecutarConsulta("Update servicio set precio='" + precio + "'where placa_vehi='" + placa + "'");
+        
     }
 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
+     * 
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -116,18 +277,27 @@ public class IngresarVehiculo extends javax.swing.JPanel {
 
     private void jbtnIngresoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnIngresoActionPerformed
         // TODO add your handling code here:
-
+         this.buscarPlaca(jtxtPlacaIngreso.getText());
+        for (int i = 0; i < numeroPlaza.length; i++) {
+            System.out.println(numeroPlaza[i]);
+        }
+        System.out.println("----------------------------------");
 
     }//GEN-LAST:event_jbtnIngresoActionPerformed
 
     private void jbtnSalidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnSalidaActionPerformed
         // TODO add your handling code here:
-
+ // TODO add your handling code here:
+        this.salidaVehiculo(jtxtPlacaIngreso.getText());
+        for (int i = 0; i < numeroPlaza.length; i++) {
+            System.out.println(numeroPlaza[i]);
+        }
+      
     }//GEN-LAST:event_jbtnSalidaActionPerformed
 
     private void jbtnPrecioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnPrecioActionPerformed
         // TODO add your handling code here:
-
+        this.calcularPrecio(jtxtPlacaIngreso.getText());
     }//GEN-LAST:event_jbtnPrecioActionPerformed
 
 //Se cambio el codigo 
