@@ -1,5 +1,21 @@
 package Paneles;
 
+import Conexion.DataBase;
+import Conexion.DataManager;
+import interfaz.Principal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -15,16 +31,132 @@ public class CRUD_Usuarios_Vehiculos extends javax.swing.JPanel {
     /**
      * Creates new form CRUD_Usuarios_Vehiculos
      */
-    
+    Principal home;
 
-    public CRUD_Usuarios_Vehiculos() {
-
+    public CRUD_Usuarios_Vehiculos(Principal principal) {
         initComponents();
+        this.home = principal;
+        this.cargarTabla();
+        this.bloquearBotonesInicio();
+
+        jtblUsuVehi.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (jtblUsuVehi.getSelectedRow() != -1) {
+                    Integer fila = jtblUsuVehi.getSelectedRow();
+                    jtxtCedula.setText(jtblUsuVehi.getValueAt(fila, 1).toString());
+                    String nomApe = jtblUsuVehi.getValueAt(fila, 2).toString();
+                    String[] arraynomApe = nomApe.split(" ");
+                    jtxtNombre.setText(arraynomApe[0]);
+                    jtxtApellido.setText(arraynomApe[1]);
+                    jtxtPlaca.setText(jtblUsuVehi.getValueAt(fila, 3).toString());
+                    jtxtColor.setText(jtblUsuVehi.getValueAt(fila, 4).toString());
+                    jtxtMarca.setText(jtblUsuVehi.getValueAt(fila, 5).toString());
+
+                }
+            }
+        });
             }
 
+  public void guardarUsuarioVechiculo() {
+        try {
+            String cedula, nombre, apellido, placa, color, marca;
+
+            cedula = jtxtCedula.getText();
+            nombre = jtxtNombre.getText();
+            apellido = jtxtApellido.getText();
+            placa = jtxtPlaca.getText();
+            color = jtxtColor.getText();
+            marca = jtxtMarca.getText();
+
+            DataBase cn = new DataBase();
+            Connection cc = cn.conectar();
+
+            String sqlUsuario = "INSERT INTO usuarios (cedula, nombre, apellido) VALUES (?,?,?)";
+            String sqlVehiculo = "INSERT INTO vehiculos (id_usuario, placa, marca, color) VALUES (?,?,?,?)";
+
+            PreparedStatement psd = cc.prepareStatement(sqlUsuario);
+            psd.setString(1, cedula);
+            psd.setString(2, nombre);
+            psd.setString(3, apellido);
+            psd.executeUpdate();
+
+            PreparedStatement psdVehiculo = cc.prepareStatement(sqlVehiculo);
+            psdVehiculo.setString(1, cedula);
+            psdVehiculo.setString(2, placa);
+            psdVehiculo.setString(3, marca);
+            psdVehiculo.setString(4, color);
+            psdVehiculo.executeUpdate();
+
+        } catch (Exception ex) {
+
+        }
+
+    }
   
+  String[] registro = new String[6];
+
+    public void cargarTabla() {
+        try {
+            DefaultTableModel modeloTabla = new DefaultTableModel();
+            String[] titulos = {"N.", "CÃ©dula", "Nombre y Apellido", "Placa", "Color", "Marca"};
+            modeloTabla.setColumnIdentifiers(titulos);
+            jtblUsuVehi.setModel(modeloTabla);
+
+            DataManager manejador = new DataManager();
+            ResultSet datos = manejador.obtenerDatos("Select * from usuarios");
+            String[] registro = new String[6];
+            int num = 1;
+            ArrayList<Object> lista = new ArrayList<>();
+
+            while (datos.next()) {
+                registro[0] = String.valueOf(num);
+                registro[1] = datos.getString("cedula");
+                String nombre = datos.getString("nombre");
+                String apellido = datos.getString("apellido");
+                registro[2] = nombre + " " + apellido;
+
+                lista = manejador.resultado("SELECT placa, color, marca FROM vehiculos WHERE id_usuario='" + registro[1] + "'");
+                registro[3] = lista.get(0).toString();
+                registro[4] = lista.get(1).toString();
+                registro[5] = lista.get(2).toString();
+                modeloTabla.addRow(registro);
+                num++;
+
+            }
+            manejador.cerrar();
+            jtblUsuVehi.setModel(modeloTabla);
+        } catch (Exception ex) {
+
+        }
+
+    }
     
+    public void bloquearBotonesInicio(){
+        jbtnGuardar.setEnabled(false);
+        jbtnActualizar.setEnabled(false);
+        jbtnBorrar.setEnabled(false);
+    }
+    
+    public void desbloquearBotonesNuevo(){
+        jbtnNuevo.setEnabled(false);
+        jbtnActualizar.setEnabled(false);
+        jbtnGuardar.setEnabled(true);
+        jbtnCancelar.setEnabled(true);
+        jbtnBorrar.setEnabled(false);
+    }
   
+    public void actualizarDatos(String cedula, String nombre, String apellido, String color) {
+        DataManager manejador = new DataManager();
+        manejador.ejecutarConsulta("UPDATE usuarios SET nombre='" + nombre + "', apellido='" + apellido + "' WHERE cedula='" + cedula + "';");
+        manejador.ejecutarConsulta("UPDATE vehiculos SET color='" + color + "' WHERE id_usuario='" + cedula + "';");
+    }
+    
+    
+    public void eliminarUsuario(String cedula){
+        DataManager manejador = new DataManager(); 
+        manejador.ejecutarConsulta("Delete from usuarios where cedula='"+cedula+"';");
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -148,7 +280,8 @@ public class CRUD_Usuarios_Vehiculos extends javax.swing.JPanel {
 
     private void jbtnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnGuardarActionPerformed
         // TODO add your handling code here:
-       
+       this.guardarUsuarioVechiculo();
+        this.cargarTabla();
     }//GEN-LAST:event_jbtnGuardarActionPerformed
 
     private void jtxtApellidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtApellidoActionPerformed
@@ -157,19 +290,24 @@ public class CRUD_Usuarios_Vehiculos extends javax.swing.JPanel {
 
     private void jbtnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnActualizarActionPerformed
         // TODO add your handling code here:
-       
-
-
+       String cedula = jtxtCedula.getText();
+        String nombre = jtxtNombre.getText();
+        String apellido = jtxtApellido.getText();
+        String color = jtxtColor.getText();
+        
+        this.actualizarDatos(cedula, nombre, apellido, color);
     }//GEN-LAST:event_jbtnActualizarActionPerformed
 
     private void jbtnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnBorrarActionPerformed
         // TODO add your handling code here:
-         
+         String cedula = jtxtCedula.getText();
+         this.eliminarUsuario(cedula);
+         this.cargarTabla();
     }//GEN-LAST:event_jbtnBorrarActionPerformed
 
     private void jbtnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnNuevoActionPerformed
         // TODO add your handling code here:
-       
+       this.desbloquearBotonesNuevo();
     }//GEN-LAST:event_jbtnNuevoActionPerformed
 
 
