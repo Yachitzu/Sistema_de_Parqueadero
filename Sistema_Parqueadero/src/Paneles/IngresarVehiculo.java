@@ -119,6 +119,67 @@ public class IngresarVehiculo extends javax.swing.JPanel {
             break;
         }
     }
+    
+     public void salidaVehiculo(String placa) {
+        try {
+            DataManager manejador = new DataManager();
+            String horaSalida = this.obtenerHora();
+            ArrayList<Object> plaza = new ArrayList<>();
+            plaza = manejador.resultado("SELECT plaza FROM servicio WHERE placa_vehi = '" + placa + "';");
+            int plazaDevolver = Integer.valueOf(plaza.get(0).toString());
+            this.devolverPlaza(plazaDevolver);
+            
+            DataBase cn = new DataBase();
+            Connection cc = cn.conectar();
+            
+            String sql = "Update servicio set hora_salida= '" + horaSalida + "' where placa_vehi='" + placa + "'";
+            manejador.ejecutarConsulta(sql);
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(IngresarVehiculo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+     
+      public void calcularPrecio(String placa) {
+        DataManager manejador = new DataManager();
+        ArrayList<Object> horas = new ArrayList<>();
+        horas = manejador.resultado("Select hora_entrada, hora_salida from servicio where placa_vehi='" + placa + "'");
+        
+        String[] Entrada = String.valueOf(horas.get(0)).split(":");
+        String[] Salida = String.valueOf(horas.get(1)).split(":");
+        
+        int horaEntrada = Integer.valueOf(Entrada[0]);
+        System.out.println(horaEntrada);
+        int minutoEntrada = Integer.valueOf(Entrada[1]);
+        System.out.println(minutoEntrada);
+        
+        int horaSalida = Integer.valueOf(Salida[0]);
+        int minutoSalida = Integer.valueOf(Salida[1]);
+        
+        int minutosEntrada = (horaEntrada * 60) + minutoEntrada;
+        System.out.println(minutosEntrada);
+        int minutosSalida = (horaSalida * 60) + minutoSalida;
+        System.out.println(minutosSalida);
+        int minutosTrans = minutosSalida - minutosEntrada;
+        System.out.println(minutosTrans);
+        
+        int numeroRestas = 0;
+        int residuo = 0;
+        if (minutosTrans > 60) {
+            while (minutosTrans > 60) {
+                minutosTrans = minutosTrans - 60;
+                numeroRestas++;
+            }
+        }
+        
+        int precio = numeroRestas * 1;
+        if (minutosTrans > 0) {
+            precio = precio + 1;
+        }
+        System.out.println(precio);
+        manejador.ejecutarConsulta("Update servicio set precio='" + precio + "'where placa_vehi='" + placa + "'");
+        
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
