@@ -95,6 +95,30 @@ public class IngresarVehiculo extends javax.swing.JPanel {
         return String.valueOf(hours + ":" + minutes);
         
     }
+    
+    public int asignarPlaza() {
+        
+        int plaza = 0;
+        for (int i = 0; i <= numeroPlaza.length; i++) {
+            if (numeroPlaza[i] != 0) {
+                plaza = numeroPlaza[i];
+                numeroPlaza[i] = 0;
+                break;
+            }
+            break;
+        }
+        return plaza;
+    }
+    
+    public void devolverPlaza(int plaza) {
+        for (int i = 0; i < numeroPlaza.length; i++) {
+            if (numeroPlaza[i] == 0) {
+                numeroPlaza[i] = plaza;
+                break;
+            }
+            break;
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
