@@ -32,7 +32,7 @@ public class CRUD_Usuarios_Vehiculos extends javax.swing.JPanel {
      * Creates new form CRUD_Usuarios_Vehiculos
      */
     Principal home;
-
+//sirve para que los usuarios ingresen los vehiculos
     public CRUD_Usuarios_Vehiculos(Principal principal) {
         initComponents();
         this.home = principal;
